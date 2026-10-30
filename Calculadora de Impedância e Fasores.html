@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Impedância e fasores: calculadora passo a passo</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌀</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#12263F;--muted:#5B6B80;--paper:#EEF1F5;--card:#fff;--line:#D5DCE6;--blue:#2447D6;--sky:#CFDBFF;--teal:#0E8A7D;--mag:#B8307A;
+--d:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;--b:"Instrument Sans","Segoe UI",system-ui,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink);font:16px/1.5 var(--b);background:var(--paper);
+background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:32px 32px;min-height:100vh}
+.wrap{max-width:1120px;margin:0 auto;padding:32px 18px 48px}
+h1{font:800 clamp(28px,5vw,44px)/1.05 var(--d);margin:0 0 6px;letter-spacing:-.02em}
+h3{font:700 16px var(--d);margin:18px 0 6px}
+.top{display:flex;flex-wrap:wrap;gap:16px;align-items:end;justify-content:space-between;margin-bottom:20px}
+.sub{margin:0;color:var(--muted);max-width:52ch}
+.freq{background:var(--card);border:1.5px solid var(--ink);border-radius:8px;padding:10px 12px;box-shadow:4px 4px 0 var(--ink)}
+.freq label{font-weight:600;font-size:14px;display:block;margin-bottom:4px}
+.freq small{display:block;color:var(--muted);margin-top:4px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.tabs button{font:600 15px var(--b);padding:10px 16px;border:1.5px solid var(--ink);background:var(--card);color:var(--ink);border-radius:8px;cursor:pointer}
+.tabs button[aria-pressed=true]{background:var(--ink);color:#fff}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.grid{display:grid;grid-template-columns:minmax(0,400px) minmax(0,1fr);gap:22px;align-items:start}
+.grid[hidden]{display:none}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1.5px solid var(--ink);border-radius:10px;padding:20px}
+.row{margin-bottom:14px}
+.row[hidden]{display:none}
+.row>label{display:block;font-weight:600;font-size:14px;margin-bottom:5px}
+.field,.ph{display:flex;border:1.5px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
+.field:focus-within,.ph:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px var(--sky)}
+input,select{font:500 17px var(--d);color:var(--ink);border:0;background:transparent;min-width:0}
+input{flex:1;padding:10px 12px;width:100%}
+select{font:600 14px var(--b);background:var(--paper);padding:0 8px;cursor:pointer;border-left:1.5px solid var(--line)}
+.ph input{border-right:1.5px solid var(--line)}
+.ph select{max-width:112px}
+.sel{font:600 15px var(--b);border:1.5px solid var(--line);border-radius:8px;padding:9px 10px;width:100%;background:#fff}
+.hint{font-size:13px;color:var(--muted);margin:8px 0 0}
+.rrow{display:grid;grid-template-columns:78px 1fr 70px 1fr 32px;gap:6px;margin-bottom:8px}
+.rrow input,.rrow select{border:1.5px solid var(--line);border-radius:8px;background:#fff;padding:8px}
+.rrow select{padding:0 4px}
+.rrow [hidden]{display:none}
+.rrow .x{border:0;background:transparent;font-size:22px;color:var(--muted);cursor:pointer}
+.btn{font:600 14px var(--b);background:var(--card);border:1.5px solid var(--ink);border-radius:8px;padding:8px 12px;cursor:pointer;margin:4px 6px 0 0}
+.card{background:var(--blue);color:#fff;border:1.5px solid var(--ink);border-radius:10px;padding:18px;box-shadow:4px 4px 0 var(--ink)}
+.card .k{margin:0;font-size:14px;opacity:.85}
+.card .big{font:800 clamp(28px,5vw,42px)/1.1 var(--d);margin:4px 0 12px;word-break:break-word}
+.card dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 14px;border-top:1px solid rgba(255,255,255,.3);padding-top:10px;font-size:15px}
+.card dt{opacity:.8}.card dd{margin:0;font-weight:600;word-break:break-word}
+.err{color:#B02A1B;font-weight:500;background:#FCE9E6;border-radius:8px;padding:12px}
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:14px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
+th{font-weight:600;color:var(--muted)}
+ol{margin:0;padding-left:20px;font-size:14.5px}li{margin-bottom:5px}
+svg{width:100%;max-width:460px;height:auto;display:block;margin:14px auto 0}
+svg text{font:12px var(--b);fill:var(--ink)}.ax{stroke:var(--ink);stroke-width:1.5}
+.dots{display:flex;gap:6px;margin:6px 0 12px}.dot{width:34px;height:8px;border-radius:4px;border:0;background:var(--line);cursor:pointer;padding:0}.dot[aria-current=true]{background:var(--blue)}.btn:disabled{opacity:.4;cursor:default}.navb{margin-top:16px}
+footer{margin-top:24px;font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>Impedância e fasores</h1>
+      <p class="sub">Calcule passo a passo componentes, Lei de Ohm e associações em série ou paralelo. Os valores iniciais já trazem o exercício do caderno: 220 V ∠ 0°, 60 Hz, L = 100 mH, C = 20 mF e 30 mF e R = 1 kΩ em série.</p>
+    </div>
+    <div class="freq">
+      <label for="fv">Frequência do circuito</label>
+      <div class="field"><input id="fv" value="60" inputmode="decimal"><select id="fu" aria-label="unidade da frequência"><option value="f">Hz (f)</option><option value="w">rad/s (ω)</option></select></div>
+      <small id="wout"></small>
+    </div>
+  </div>
+
+  <div class="tabs" role="group" aria-label="Modos">
+    <button data-t="E" aria-pressed="true">Exercício por etapas</button>
+    <button data-t="S" aria-pressed="false">Exercício de uma só vez</button>
+    <button data-t="A" aria-pressed="false">Ferramenta: componentes</button>
+    <button data-t="O" aria-pressed="false">Ferramenta: Lei de Ohm</button>
+  </div>
+
+  <section id="tA" class="grid" hidden>
+    <div class="panel">
+      <div class="row"><label>Resistor (R)</label><div id="aR"></div></div>
+      <div class="row"><label>Indutor (L)</label><div id="aL"></div></div>
+      <div class="row"><label>Capacitor (C)</label><div id="aC"></div></div>
+      <p class="hint">Deixe em branco o que não precisar. Usa: Z<sub>R</sub> = R, Z<sub>L</sub> = jωL e Z<sub>C</sub> = 1/(jωC).</p>
+    </div>
+    <div class="panel" id="rA"></div>
+  </section>
+
+  <section id="tO" class="grid" hidden>
+    <div class="panel">
+      <div class="row"><label for="ou">O que você quer descobrir?</label>
+        <select class="sel" id="ou"><option value="Z">Impedância Z = V / I</option><option value="I">Corrente I = V / Z</option><option value="V">Tensão V = Z · I</option></select></div>
+      <div class="row" id="oVw"><label>Tensão V (volts)</label><div id="oV"></div></div>
+      <div class="row" id="oIw"><label>Corrente I (ampères)</label><div id="oI"></div></div>
+      <div class="row" id="oZw"><label>Impedância Z (ohms)</label><div id="oZ"></div></div>
+      <p class="hint">Valores eficazes. Escolha polar (módulo e ângulo) ou retangular (a + jb) ao lado de cada valor.</p>
+    </div>
+    <div class="panel" id="rO"></div>
+  </section>
+
+  <section id="tS" class="grid">
+    <div class="panel">
+      <div class="row"><label for="st">Tipo de associação</label>
+        <select class="sel" id="st"><option value="s">Série: Zeq = Z1 + Z2 + …</option><option value="p">Paralelo: 1/Zeq = 1/Z1 + 1/Z2 + …</option></select></div>
+      <div class="row"><label>Elementos</label><div id="rows"></div>
+        <button class="btn" id="add" type="button">+ Elemento</button></div>
+      <div class="row"><label><input type="checkbox" id="vOn" checked style="width:auto;vertical-align:middle"> Incluir fonte de tensão V</label><div id="sV"></div></div>
+      <button class="btn" id="carry" type="button">Levar Zeq para uma nova associação</button>
+      <p class="hint">Para circuitos mistos, resolva por etapas: calcule uma parte, leve Zeq e combine com o restante.</p>
+    </div>
+    <div class="panel" id="rS"></div>
+  </section>
+
+  <footer>Tensões e correntes em valor eficaz (fasor). No tempo: v(t) = Vef·√2·sen(ωt + φ). Tudo é calculado no seu navegador.</footer>
+</div>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const C=(re,im=0)=>({re,im}),P=(m,d)=>C(m*Math.cos(d*Math.PI/180),m*Math.sin(d*Math.PI/180));
+const add=(a,b)=>C(a.re+b.re,a.im+b.im),mul=(a,b)=>C(a.re*b.re-a.im*b.im,a.re*b.im+a.im*b.re);
+const mag=a=>Math.hypot(a.re,a.im),ang=a=>Math.atan2(a.im,a.re)*180/Math.PI;
+function div(a,b){const d=b.re*b.re+b.im*b.im;if(d<1e-24)throw Error("Divisão por zero: a impedância ou a corrente não pode ser nula.");return C((a.re*b.re+a.im*b.im)/d,(a.im*b.re-a.re*b.im)/d)}
+const nf=(n,d=3)=>{n=Math.abs(n)<1e-9?0:n;return n.toLocaleString("pt-BR",{maximumFractionDigits:d})};
+const pol=(z,u="")=>`${nf(mag(z),mag(z)<10?4:3)} ∠ ${nf(ang(z),2)}° ${u}`.trim();
+const rect=(z,u="")=>`${nf(z.re)} ${z.im<0?"−":"+"} j${nf(Math.abs(z.im))} ${u}`.trim();
+const num=s=>{s=String(s).trim().replace(/\s/g,"").replace(",",".");return s===""?NaN:Number(s)};
+const UN={R:[["Ω",1],["kΩ",1e3],["mΩ",1e-3]],L:[["µH",1e-6],["mH",1e-3],["H",1]],C:[["pF",1e-12],["nF",1e-9],["µF",1e-6],["mF",1e-3],["F",1]]};
+const DEF={R:"Ω",L:"mH",C:"µF"};
+const opts=(k,u)=>UN[k].map(x=>`<option${x[0]==u?" selected":""}>${x[0]}</option>`).join("");
+const uf=(id,k,v,u)=>$("#"+id).innerHTML=`<div class="field" data-k="${k}"><input value="${v}" inputmode="decimal" aria-label="valor"><select aria-label="unidade">${opts(k,u||DEF[k])}</select></div>`;
+const rdUF=id=>{const f=$("#"+id+" .field"),n=num(f.querySelector("input").value);return isNaN(n)?NaN:n*UN[f.dataset.k].find(x=>x[0]==f.querySelector("select").value)[1]};
+const phw=(id,m,a)=>$("#"+id).innerHTML=`<div class="ph"><input class="m" value="${m}" inputmode="decimal" aria-label="módulo ou parte real"><input class="a" value="${a}" inputmode="decimal" aria-label="ângulo ou parte imaginária"><select class="md" aria-label="forma"><option value="p">∠ polar</option><option value="r">a + jb</option></select></div>`;
+const ph=(id,n)=>{const e=$("#"+id),m=num(e.querySelector(".m").value),a=num(e.querySelector(".a").value);if(isNaN(m)||isNaN(a))throw Error("Preencha "+n+".");return e.querySelector(".md").value=="p"?P(m,a):C(m,a)};
+function getW(need){const v=num($("#fv").value),w=$("#fu").value=="f"?v*2*Math.PI:v;if(!(w>0)){if(need)throw Error("Informe a frequência do circuito (acima, à direita).");return 0}return w}
+const teor=z=>{const p=ang(z);return Math.abs(p)<1e-6?"resistivo (φ = 0)":p>0?"indutivo (φ > 0)":"capacitivo (φ < 0)"};
+const tx=(s,z,u,w)=>`${s}(t) = ${nf(mag(z),4)}·√2·sen(${nf(w)}·t ${ang(z)<0?"−":"+"} ${nf(Math.abs(ang(z)),2)}°) ${u}`;
+const BL="#2447D6",TE="#0E8A7D",MA="#B8307A",IN="#12263F";
+
+function plot(items){
+  const cx=210,cy=150,R=112,mx=Math.max(1e-12,...items.map(i=>mag(i.z))),k=R/mx;
+  let s=`<line class="ax" x1="14" y1="${cy}" x2="406" y2="${cy}"/><line class="ax" x1="${cx}" y1="10" x2="${cx}" y2="290"/><text x="404" y="${cy-6}" text-anchor="end">Re</text><text x="${cx+6}" y="20">Im</text>`;
+  for(const it of items){
+    const x=cx+it.z.re*k,y=cy-it.z.im*k,t=Math.atan2(y-cy,x-cx),c=Math.cos(t),d=Math.sin(t);
+    if(it.proj)s+=`<path d="M${cx} ${y}H${x}V${cy}" fill="none" stroke="${it.col}" stroke-dasharray="4 4" opacity=".6"/>`;
+    s+=`<line x1="${cx}" y1="${cy}" x2="${x-9*c}" y2="${y-9*d}" stroke="${it.col}" stroke-width="3" stroke-linecap="round"/>`;
+    s+=`<polygon points="${x},${y} ${x-12*c-5*d},${y-12*d+5*c} ${x-12*c+5*d},${y-12*d-5*c}" fill="${it.col}"/>`;
+    s+=`<text x="${x+(x>=cx?8:-8)}" y="${y+(y<cy?-6:14)}" text-anchor="${x>=cx?"start":"end"}" style="fill:${it.col};font-weight:600">${it.n} ${nf(mag(it.z),2)}∠${nf(ang(it.z),1)}°</text>`;
+  }
+  return `<svg viewBox="0 0 420 300" role="img" aria-label="Diagrama fasorial em escala normalizada">${s}</svg>`;
+}
+function show(id,o){
+  $("#"+id).innerHTML=o.err?`<p class="err" role="alert">${o.err}</p>`:
+  `<div class="card" aria-live="polite"><p class="k">${o.k}</p><p class="big">${o.big}</p><dl>${o.dl.map(r=>`<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join("")}</dl></div>${o.table||""}${plot(o.items)}<p class="hint" style="text-align:center">Escala normalizada: cada vetor é proporcional ao maior do diagrama.</p><h3>Passo a passo</h3><ol>${o.steps.map(s=>`<li>${s}</li>`).join("")}</ol>`;
+}
+
+/* 1. Componentes */
+function runA(){
+  const w=getW(true),st=[],items=[],dl=[];
+  const R=rdUF("aR"),L=rdUF("aL"),Cc=rdUF("aC");
+  if(!isNaN(R)){const z=C(R);st.push(`Resistor: Z<sub>R</sub> = R = ${nf(R)} Ω → ${pol(z,"Ω")}`);items.push({n:"ZR",z,col:BL});dl.push(["Z<sub>R</sub>",pol(z,"Ω")])}
+  if(!isNaN(L)){const x=w*L,z=C(0,x);st.push(`Indutor: X<sub>L</sub> = ω·L = ${nf(w)} · ${nf(L,6)} = ${nf(x)} Ω → Z<sub>L</sub> = j${nf(x)} = ${pol(z,"Ω")}`);items.push({n:"ZL",z,col:TE});dl.push(["Z<sub>L</sub>",pol(z,"Ω")])}
+  if(!isNaN(Cc)){if(Cc<=0)throw Error("O capacitor precisa ser maior que zero.");const x=1/(w*Cc),z=C(0,-x);st.push(`Capacitor: X<sub>C</sub> = 1/(ω·C) = 1 / (${nf(w)} · ${nf(Cc,8)}) = ${nf(x)} Ω → Z<sub>C</sub> = 1/(jωC) = −j${nf(x)} = ${pol(z,"Ω")}`);items.push({n:"ZC",z,col:MA});dl.push(["Z<sub>C</sub>",pol(z,"Ω")])}
+  if(!items.length)throw Error("Preencha pelo menos um componente.");
+  show("rA",{k:"Impedâncias no domínio fasorial",big:items.map(i=>pol(i.z,"Ω")).join("<br>"),dl,items,steps:st});
+}
+
+/* 2. Lei de Ohm */
+function runO(){
+  const u=$("#ou").value;["V","I","Z"].forEach(k=>$("#o"+k+"w").hidden=k==u);
+  const w=getW(false);let V,I,Z,st=[];
+  if(u=="Z"){V=ph("oV","a tensão V");I=ph("oI","a corrente I");Z=div(V,I);
+    st.push(`Z = V / I = (${pol(V,"V")}) / (${pol(I,"A")})`,`Módulos se dividem: |Z| = ${nf(mag(V))} / ${nf(mag(I))} = ${nf(mag(Z))} Ω`,`Ângulos se subtraem: φ = ${nf(ang(V),2)}° − (${nf(ang(I),2)}°) = ${nf(ang(Z),2)}°`)}
+  else if(u=="I"){V=ph("oV","a tensão V");Z=ph("oZ","a impedância Z");I=div(V,Z);
+    st.push(`I = V / Z = (${pol(V,"V")}) / (${pol(Z,"Ω")})`,`Módulos se dividem: |I| = ${nf(mag(V))} / ${nf(mag(Z))} = ${nf(mag(I))} A`,`Ângulos se subtraem: ${nf(ang(V),2)}° − (${nf(ang(Z),2)}°) = ${nf(ang(I),2)}°`)}
+  else{I=ph("oI","a corrente I");Z=ph("oZ","a impedância Z");V=mul(Z,I);
+    st.push(`V = Z · I = (${pol(Z,"Ω")}) · (${pol(I,"A")})`,`Módulos se multiplicam: |V| = ${nf(mag(Z))} · ${nf(mag(I))} = ${nf(mag(V))} V`,`Ângulos se somam: ${nf(ang(Z),2)}° + (${nf(ang(I),2)}°) = ${nf(ang(V),2)}°`)}
+  st.push(`Triângulo de impedâncias: R = |Z|·cos φ = ${nf(Z.re)} Ω; X = |Z|·sen φ = ${nf(Z.im)} Ω; |Z| = ${nf(mag(Z))} Ω; φ = ${nf(ang(Z),2)}°`,`Defasagem entre tensão e corrente: ${nf(ang(V)-ang(I),2)}° → teor <b>${teor(Z)}</b>`);
+  if(w)st.push("Domínio do tempo: "+tx("v",V,"V",w),"Domínio do tempo: "+tx("i",I,"A",w));
+  const M={Z:[Z,"Ω"],I:[I,"A"],V:[V,"V"]}[u];
+  show("rO",{k:{Z:"Impedância Z",I:"Corrente I",V:"Tensão V"}[u],big:pol(M[0],M[1]),dl:[["Retangular",rect(M[0],M[1])],["Teor do circuito",teor(Z)],["Defasagem φ",nf(ang(Z),2)+"°"]],
+    items:[{n:"V",z:V,col:BL},{n:"I",z:I,col:TE},{n:"Z",z:Z,col:MA,proj:true}],steps:st});
+}
+
+/* 3. Associação */
+function addRow(t="R",a="",b="",u){
+  const d=document.createElement("div");d.className="rrow";
+  d.innerHTML=`<select class="t" aria-label="tipo"><option value="R">R</option><option value="L">L</option><option value="C">C</option><option value="zp">Z ∠</option><option value="zr">Z a+jb</option></select><input class="a" value="${a}" inputmode="decimal" aria-label="valor"><select class="u" aria-label="unidade"></select><input class="b" value="${b}" inputmode="decimal" aria-label="segundo valor"><button class="x" type="button" aria-label="Remover elemento">×</button>`;
+  d.querySelector(".t").value=t;sync(d,u);$("#rows").append(d);
+}
+function sync(d,u){
+  const t=d.querySelector(".t").value,z=t[0]=="z",su=d.querySelector(".u"),b=d.querySelector(".b"),a=d.querySelector(".a");
+  su.hidden=z;b.hidden=!z;
+  if(!z)su.innerHTML=opts(t,u||DEF[t]);
+  a.placeholder=t=="zp"?"|Z|":t=="zr"?"R":"valor";b.placeholder=t=="zp"?"ângulo °":"X";
+}
+function runS(){
+  const w=getW(false),f=w/2/Math.PI,ser=$("#st").value=="s",rows=$$("#rows .rrow"),cnt={},els=[],on=$("#vOn").checked;
+  if(!rows.length)throw Error("Adicione ao menos um elemento.");
+  const V=on?ph("sV","a fonte V"):null;
+  rows.forEach(r=>{
+    const t=r.querySelector(".t").value,a=num(r.querySelector(".a").value),b=num(r.querySelector(".b").value);
+    const nm=(t[0]=="z"?"Z":t)+(cnt[t[0]]=(cnt[t[0]]||0)+1);let z,d;
+    if(isNaN(a)||(t[0]=="z"&&isNaN(b)))throw Error("Preencha todos os valores de "+nm+".");
+    if(t[0]=="z"){z=t=="zp"?P(a,b):C(a,b);d=`${nm} = ${pol(z,"Ω")}`}
+    else{const v=a*UN[t].find(x=>x[0]==r.querySelector(".u").value)[1];
+      if(t=="R"){z=C(v);d=`${nm} = ${nf(v)} Ω → ${pol(z,"Ω")}`}
+      else{if(!w)throw Error("Informe a frequência para usar L e C.");
+        if(t=="L"){const x=w*v;z=C(0,x);d=`X<sub>${nm}</sub> = 2π·f·L = 2π · ${nf(f,4)} · ${nf(v,6)} = ${nf(x,4)} Ω → ${nm} = ${pol(z,"Ω")}`}
+        else{if(v<=0)throw Error("C precisa ser maior que zero.");const x=1/(w*v);z=C(0,-x);d=`X<sub>${nm}</sub> = 1 / (2π·f·C) = 1 / (2π · ${nf(f,4)} · ${nf(v,6)}) = ${nf(x,4)} Ω → ${nm} = ${pol(z,"Ω")}`}}}
+    els.push({n:nm,z,d});
+  });
+  const l3=[];let Z;
+  if(ser){Z=els.reduce((s,e)=>add(s,e.z),C(0));l3.push(`Série: Zeq = ${els.map(e=>e.n).join(" + ")}`,`Zeq = ${els.map(e=>"("+rect(e.z)+")").join(" + ")} = ${rect(Z,"Ω")}`)}
+  else{const Y=els.reduce((s,e)=>add(s,div(C(1),e.z)),C(0));l3.push(`Paralelo: Yeq = ${els.map(e=>"1/"+e.n).join(" + ")} = ${rect(Y,"S")}`);Z=div(C(1),Y);l3.push(`Zeq = 1 / Yeq = ${rect(Z,"Ω")}`)}
+  l3.push(`Zeq = ${pol(Z,"Ω")}`,`Triângulo de impedâncias: R = ${nf(Z.re)} Ω e X = ${nf(Z.im)} Ω → teor <b>${teor(Z)}</b>`);
+  window.lastZ=Z;
+  const cols=[BL,TE,MA,"#C77D00","#6B4CC9","#2A7DB5"];
+  const l1=[`Frequência: f = ${nf(f,4)} Hz → ω = 2π·f = ${nf(w)} rad/s`,`Associação em ${ser?"série":"paralelo"}: ${els.map(e=>e.n).join(", ")}`];
+  if(on)l1.push(`Fonte: V = ${pol(V,"V")}`);
+  const sec=[{t:"Dados do circuito",big:`${nf(f,4)} Hz`,l:l1},
+    {t:"Impedância de cada elemento",big:els.map(e=>pol(e.z,"Ω")).join("<br>"),l:els.map(e=>e.d)},
+    {t:"Impedância equivalente",big:pol(Z,"Ω"),l:l3}];
+  let items=[...els.map((e,i)=>({n:e.n,z:e.z,col:cols[i%6]})),{n:"Zeq",z:Z,col:IN,proj:true}],I;
+  if(on){
+    I=div(V,Z);
+    els.forEach(e=>{e.I=ser?I:div(V,e.z);e.V=ser?mul(e.z,I):V});
+    const li=[`i = V / Zeq = (${pol(V,"V")}) / (${pol(Z,"Ω")})`,`Módulos se dividem: |i| = ${nf(mag(V))} / ${nf(mag(Z))} = ${nf(mag(I),4)} A`,`Ângulos se subtraem: ${nf(ang(V),2)}° − (${nf(ang(Z),2)}°) = ${nf(ang(I),2)}°`,`i = ${pol(I,"A")}`];
+    if(w)li.push("No tempo: "+tx("i",I,"A",w));
+    sec.push({t:"Corrente total (V = Zeq · i)",big:pol(I,"A"),l:li});
+    const lt=[ser?"Série: a corrente é a mesma em todos; a tensão em cada elemento é Vk = Zk · i.":"Paralelo: a tensão é a mesma em todos; a corrente em cada elemento é Ik = V / Zk."];
+    if(w)els.forEach(e=>lt.push(`${tx("v"+e.n,e.V,"V",w)}; ${tx("i"+e.n,e.I,"A",w)}`));
+    sec.push({t:"Tensões e correntes em cada elemento",l:lt,big:"",html:`<table><tr><th>Elemento</th><th>Z</th><th>Tensão</th><th>Corrente</th></tr>${els.map(e=>`<tr><td>${e.n}</td><td>${pol(e.z,"Ω")}</td><td>${pol(e.V,"V")}</td><td>${pol(e.I,"A")}</td></tr>`).join("")}</table>`});
+    items=ser?[{n:"V",z:V,col:IN},...els.map((e,i)=>({n:"V"+e.n,z:e.V,col:cols[i%6]}))]:[{n:"I",z:I,col:IN},...els.map((e,i)=>({n:"I"+e.n,z:e.I,col:cols[i%6]}))];
+  }
+  sec.push({t:"Diagrama fasorial",big:"",l:[],html:plot(items)+'<p class="hint" style="text-align:center">Escala normalizada: cada vetor é proporcional ao maior do diagrama.</p>'});
+  const ol=a=>a.length?`<ol>${a.map(x=>`<li>${x}</li>`).join("")}</ol>`:"";
+  if(cur=="S"){
+    const k=on?"Corrente total":"Impedância equivalente",big=on?pol(I,"A"):pol(Z,"Ω");
+    $("#rS").innerHTML=`<div class="card" aria-live="polite"><p class="k">${k}</p><p class="big">${big}</p><dl><dt>Impedância Zeq</dt><dd>${pol(Z,"Ω")} = ${rect(Z,"Ω")}</dd><dt>Teor do circuito</dt><dd>${teor(Z)}</dd></dl></div>`+sec.map((s,i)=>`<h3>${i+1}. ${s.t}</h3>${ol(s.l)}${s.html||""}`).join("");
+  }else{
+    step=Math.max(0,Math.min(step,sec.length-1));const s=sec[step];
+    $("#rS").innerHTML=`<p class="hint" style="margin:0 0 6px">Etapa ${step+1} de ${sec.length}</p><div class="dots">${sec.map((x,i)=>`<button class="dot" type="button" data-s="${i}" aria-label="Etapa ${i+1}: ${x.t}" aria-current="${i==step}"></button>`).join("")}</div>`+
+    (s.big?`<div class="card" aria-live="polite"><p class="k">${step+1}. ${s.t}</p><p class="big">${s.big}</p></div>`:`<h3 style="margin-top:0">${step+1}. ${s.t}</h3>`)+ol(s.l)+(s.html||"")+
+    `<div class="navb"><button class="btn" type="button" data-s="${step-1}"${step==0?" disabled":""}>← Anterior</button><button class="btn" type="button" data-s="${step+1}"${step==sec.length-1?" disabled":""}>Próxima etapa →</button></div>`;
+  }
+}
+
+/* controle */
+const RUN={A:runA,O:runO,S:runS,E:runS};let cur="E",step=0;
+function run(){
+  const w=getW(false);
+  $("#wout").textContent=w?`ω = ${nf(w)} rad/s · f = ${nf(w/2/Math.PI)} Hz`:"Digite um valor maior que zero";
+  try{RUN[cur]()}catch(e){show("r"+(cur=="E"?"S":cur),{err:e.message})}
+}
+$$(".tabs button").forEach(b=>b.onclick=()=>{cur=b.dataset.t;$$(".tabs button").forEach(x=>x.setAttribute("aria-pressed",x==b));["A","O","S"].forEach(k=>$("#t"+k).hidden=k!=(cur=="E"?"S":cur));run()});
+document.addEventListener("input",run);
+$("#rS").addEventListener("click",e=>{const b=e.target.closest("[data-s]");if(b){step=+b.dataset.s;run()}});
+document.addEventListener("change",e=>{if(e.target.matches(".rrow .t"))sync(e.target.parentElement);run()});
+$("#rows").addEventListener("click",e=>{if(e.target.matches(".x")){e.target.parentElement.remove();run()}});
+$("#add").onclick=()=>{addRow();run()};
+$("#carry").onclick=()=>{if(!window.lastZ)return;const z=window.lastZ;$("#rows").innerHTML="";addRow("zp",+mag(z).toFixed(6),+ang(z).toFixed(6));run()};
+
+uf("aR","R","1","kΩ");uf("aL","L","100","mH");uf("aC","C","20","mF");
+phw("oV","12","15");phw("oI","3","-45");phw("oZ","4","60");
+phw("sV","220","0");
+addRow("L","100","","mH");addRow("C","20","","mF");addRow("C","30","","mF");addRow("R","1","","kΩ");
+run();
+</script>
+</body>
+</html>
