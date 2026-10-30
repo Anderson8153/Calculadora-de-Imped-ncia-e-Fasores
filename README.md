@@ -1,1 +1,1 @@
-# Calculadora-de-Imped-ncia-e-Fasores
+# Calculadora-de-Impedancia-e-Fasores
