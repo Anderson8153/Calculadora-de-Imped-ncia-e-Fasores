@@ -2,7 +2,7 @@
 
 Calculadora web para circuitos de corrente alternada em regime senoidal permanente. Resolve reatâncias, Lei de Ohm e associações em série ou paralelo de resistores, indutores e capacitores, mostrando o **passo a passo** de cada conta e o **diagrama fasorial**.
 
-**Acesse online:** https://github.com/Anderson8153/Calculadora-de-Impedancia-e-Fasores
+**Acesse online:** https://github.com/Anderson8153/Calculadora-de-Imped-ncia-e-Fasores
 
 ## O que ela faz
 
